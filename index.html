@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="https://picsum.photos/32/32" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>사회복지사 사업계획서 프롬프트 생성기</title>
-    <!-- Tailwind CSS via CDN for styling convenience -->
+    <!-- Tailwind CSS for layout -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -14,22 +14,23 @@
       }
       /* STRICT Compact typography overrides for "No Empty Lines" request */
       .prose p {
-        margin-top: 0.1em !important;
-        margin-bottom: 0.1em !important;
-        line-height: 1.4;
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+        line-height: 1.5;
       }
       .prose ul, .prose ol {
-        margin-top: 0.1em !important;
-        margin-bottom: 0.1em !important;
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
         padding-left: 1.2em;
       }
       .prose li {
         margin-top: 0 !important;
         margin-bottom: 0 !important;
+        padding-left: 0 !important;
       }
       .prose h1, .prose h2, .prose h3, .prose h4 {
-        margin-top: 0.8em !important;
-        margin-bottom: 0.4em !important;
+        margin-top: 1em !important;
+        margin-bottom: 0.5em !important;
       }
       .prose table {
         font-size: 0.85rem;
@@ -42,7 +43,8 @@
       .prose blockquote {
         margin-top: 0.5em !important;
         margin-bottom: 0.5em !important;
-        font-style: normal !important;
+        padding-top: 0.2em !important;
+        padding-bottom: 0.2em !important;
       }
     </style>
   <script type="importmap">
@@ -62,7 +64,7 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-    <!-- CRITICAL FIX: Use relative path for GitHub Pages compatibility -->
+    <!-- Vite Entry Point -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>

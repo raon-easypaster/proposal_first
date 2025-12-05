@@ -4,8 +4,14 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // Ensures assets are loaded correctly on GitHub Pages
+  base: './', // CRITICAL: Ensures assets use relative paths (e.g., "./assets/...") so they load on GitHub Pages subdirectories
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+  },
   define: {
-    'process.env': {} // Polyfill process.env to avoid crash in browser
+    // Polyfill to prevent "process is not defined" error in some libs
+    'process.env': {} 
   }
 });
