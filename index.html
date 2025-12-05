@@ -11,6 +11,18 @@
       body {
         font-family: 'Noto Sans KR', sans-serif;
       }
+      /* Compact typography overrides */
+      .prose p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+      .prose ul > li {
+        margin-top: 0.2em;
+        margin-bottom: 0.2em;
+      }
+      .prose table {
+        font-size: 0.875rem;
+      }
     </style>
   <script type="importmap">
 {
@@ -27,5 +39,6 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
