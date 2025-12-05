@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Building, FileText, Clipboard, Check, Sparkles, Upload, File as FileIcon, X, Settings, Key } from 'lucide-react';
+import { Building, FileText, Clipboard, Check, Sparkles, Upload, File as FileIcon, X, Settings, Key, AlertCircle } from 'lucide-react';
 import { AgencyInfo, ProjectInfo, FileData } from './types';
 import { InputGroup } from './components/InputGroup';
 import { generateProposalFromGemini } from './services/geminiService';
@@ -32,16 +32,18 @@ const App: React.FC = () => {
   });
 
   const [attachedFile, setAttachedFile] = useState<FileData | null>(null);
+  const [isFileProcessing, setIsFileProcessing] = useState<boolean>(false);
   const [generatedPrompt, setGeneratedPrompt] = useState<string>('');
   const [proposalResult, setProposalResult] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Initialize API Key from Env or LocalStorage
+  // Initialize API Key
   useEffect(() => {
-    // Try env vars first (Vite or Node), then localStorage
     // @ts-ignore
     const envKey = import.meta.env?.VITE_API_KEY || process.env?.API_KEY;
     const storedKey = localStorage.getItem('gemini_api_key');
@@ -51,7 +53,7 @@ const App: React.FC = () => {
     } else if (storedKey) {
       setApiKey(storedKey);
     } else {
-      setShowSettings(true); // Open settings if no key found
+      setShowSettings(true);
     }
   }, []);
 
@@ -71,16 +73,22 @@ const App: React.FC = () => {
     setProjectInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const validateAndProcessFile = (file: File) => {
+    setIsFileProcessing(true);
+    
+    // Check file extension (case-insensitive)
+    const isPdfExt = file.name.toLowerCase().endsWith('.pdf');
+    const isPdfType = file.type === 'application/pdf';
 
-    if (file.type !== 'application/pdf') {
+    if (!isPdfExt && !isPdfType) {
       alert('PDF 파일만 업로드 가능합니다.');
+      setIsFileProcessing(false);
       return;
     }
+
     if (file.size > 20 * 1024 * 1024) {
       alert('파일 크기는 20MB 이하여야 합니다.');
+      setIsFileProcessing(false);
       return;
     }
 
@@ -89,11 +97,48 @@ const App: React.FC = () => {
       const base64String = (event.target?.result as string).split(',')[1];
       setAttachedFile({
         name: file.name,
-        mimeType: file.type,
+        mimeType: 'application/pdf',
         data: base64String
       });
+      setIsFileProcessing(false);
+    };
+    reader.onerror = () => {
+      alert('파일을 읽는 중 오류가 발생했습니다.');
+      setIsFileProcessing(false);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndProcessFile(file);
+    }
+    // Critical: Reset input value to allow re-selecting the same file if needed
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      validateAndProcessFile(file);
+    }
   };
 
   const removeFile = () => {
@@ -103,7 +148,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Construct the prompt
+  // Construct Prompt
   useEffect(() => {
     let prompt = `
 당신은 대한민국 사회복지공동모금회(사랑의열매) 배분 신청 사업계획서 작성 최고 전문가입니다.
@@ -359,17 +404,34 @@ const App: React.FC = () => {
             <div className="p-5">
               {!attachedFile ? (
                 <div 
-                  className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer group/upload"
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer group/upload
+                    ${isDragging ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-slate-300 hover:bg-slate-50 hover:border-blue-400'}
+                  `}
                   onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                 >
                   <div className="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover/upload:bg-blue-100 transition-colors">
                     <FileIcon className="h-6 w-6 text-slate-400 group-hover/upload:text-blue-500 transition-colors" />
                   </div>
-                  <p className="text-sm font-medium text-slate-700">클릭하여 PDF 업로드</p>
-                  <p className="text-xs text-slate-400 mt-1">공고문 등을 첨부하면 AI가 분석합니다 (최대 20MB)</p>
+                  {isFileProcessing ? (
+                    <div className="flex flex-col items-center">
+                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mb-2"></div>
+                       <p className="text-sm font-medium text-slate-700">파일 분석 중...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-slate-700">
+                        {isDragging ? '파일을 여기에 놓으세요' : '클릭 또는 드래그하여 PDF 업로드'}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">공고문 등을 첨부하면 AI가 분석합니다 (최대 20MB)</p>
+                    </>
+                  )}
+                  
                   <input 
                     type="file" 
-                    accept="application/pdf" 
+                    accept=".pdf,application/pdf" 
                     onChange={handleFileChange} 
                     className="hidden" 
                     ref={fileInputRef}
