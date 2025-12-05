@@ -28,7 +28,7 @@ export const generateProposalFromGemini = async (prompt: string, file?: FileData
       model: 'gemini-2.5-flash',
       contents: { parts },
       config: {
-        // Enable thinking for more detailed reasoning
+        // Enable thinking for more detailed reasoning and structural planning
         thinkingConfig: { thinkingBudget: 4096 },
         temperature: 0.7,
       }

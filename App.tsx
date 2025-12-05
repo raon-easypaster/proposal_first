@@ -85,59 +85,87 @@ const App: React.FC = () => {
   // Construct the prompt whenever inputs change
   useEffect(() => {
     let prompt = `
-당신은 전문적인 사회복지사 및 제안서 작성 전문가입니다.
-사회복지공동모금회 배분 신청 사업계획서 표준 양식에 맞춰 아래 정보를 바탕으로 구체적이고 설득력 있는 사업계획서를 작성해주세요.
+당신은 대한민국 사회복지공동모금회(사랑의열매) 배분 신청 사업계획서 작성 전문 컨설턴트입니다.
+아래 제공된 기관 정보와 사업 개요를 바탕으로, 심사위원이 즉시 채택할 수 있는 수준의 **구체적이고, 논리적이며, 전문적인** 사업계획서를 작성해주세요.
+
+[필수 지침]
+1. **서술 방식**: 전문적인 사회복지 용어를 적절히 사용하되, 문장은 명료하고 힘 있게 작성하십시오.
+2. **포맷팅(중요)**: 
+   - **빈 줄 최소화**: 불필요한 엔터(공백 라인)를 제거하여 문서를 컴팩트하게 만드세요.
+   - **가독성**: 주요 내용은 볼드체(**)로 강조하세요.
+3. **시각화(인포그래픽)**: 
+   - 텍스트만 나열하지 말고, 내용의 이해를 돕기 위한 인포그래픽 삽입 위치와 내용을 제안하세요.
+   - 표기법: \`> 🖼️ **[인포그래픽 제안]** (제목): (내용 설명)\`
+4. **평가 및 예산**: 반드시 **마크다운 표(Table)** 형식을 사용하여 구조화해서 보여주세요.
+
+---
 `;
 
     if (attachedFile) {
       prompt += `
-[중요] 첨부된 PDF 파일은 해당 사업의 공고문 또는 참고자료입니다. 이 파일의 내용을 면밀히 분석하여, 공고의 취지, 심사 기준, 필수 포함 사항 등을 반영하여 제안서를 작성해주세요.
+[참고 자료]
+첨부된 PDF 파일은 해당 사업의 공고문 또는 관련 자료입니다. 이 내용을 철저히 분석하여 제안서에 반영해주세요.
+---
 `;
     }
 
     prompt += `
-## 1. 신청 기관 및 사업 정보
+## 1. 신청 기관 정보
 - 기관명: ${agencyInfo.name || '(미입력)'}
 - 대표자: ${agencyInfo.representative || '(미입력)'}
-- 주소: ${agencyInfo.address || '(미입력)'}
 - 설립일: ${agencyInfo.foundingDate || '(미입력)'}
 - 주요 사업: ${agencyInfo.mainBusiness || '(미입력)'}
+- 소재지: ${agencyInfo.address || '(미입력)'}
 
-## 2. 사업 개요 및 상세 내용
-- 사업명: ${projectInfo.title || '(미입력)'}
-- 핵심 키워드: ${projectInfo.keywords || '(미입력)'}
-`;
+## 2. 사업 개요
+- **사업명**: ${projectInfo.title || '(미입력)'}
+- **핵심 키워드**: ${projectInfo.keywords || '(미입력)'}
+- 사업 대상: ${projectInfo.target || '(대상 미지정)'}
+- 참여 인원: ${projectInfo.participantCount || '(인원 미정)'}
+- 사업 장소: ${projectInfo.location || '(장소 미정)'}
+- 총 예산: ${projectInfo.budget || '(예산 미정)'}
+- 사업 기간: ${projectInfo.projectPeriod || '(기간 미정)'}
 
-    // Add optional fields
-    if (projectInfo.target) prompt += `- 사업 대상: ${projectInfo.target}\n`;
-    if (projectInfo.participantCount) prompt += `- 참여 인원: ${projectInfo.participantCount}\n`;
-    if (projectInfo.location) prompt += `- 사업 장소: ${projectInfo.location}\n`;
-    if (projectInfo.projectPeriod) prompt += `- 사업 기간: ${projectInfo.projectPeriod}\n`;
-    if (projectInfo.budget) prompt += `- 총 예산: ${projectInfo.budget}\n`;
+## 3. 작성 요청 목차 및 가이드
+아래 목차에 따라 내용을 작성하되, 각 항목은 **최소 300자 이상** 상세하게 기술하세요.
 
-    prompt += `
-## 3. 작성 요청 사항 (사회복지공동모금회 기준)
-다음 목차에 따라 내용을 작성하되, **각 항목을 매우 구체적이고 상세하게(Detailed)** 기술하세요.
-**[중요 포맷 가이드]**
-1. **빈 줄 제거**: 단락 사이의 불필요한 빈 줄(개행)을 최소화하여 컴팩트하게 작성하세요.
-2. **상세 서술**: 단순히 개조식으로만 나열하지 말고, 논리적 근거를 포함한 서술형 문장을 충분히 활용하세요.
-3. **분량**: 각 항목별로 충분한 분량을 확보하여 깊이 있는 제안서가 되도록 해주세요.
-4. **시각화 요소(인포그래픽) 포함**: 
-   - 심사위원의 이해를 돕기 위해 **[인포그래픽 제안: (제목) - (내용 설명)]** 형식으로 시각 자료가 필요한 위치를 명시해주세요.
-   - 예시: [인포그래픽 제안: 사업 추진 체계도 - 신청 기관과 협력 기관 간의 역할 분담 도식화]
-   - 데이터, 일정, 예산, 평가 지표 등은 반드시 **마크다운 표(Table)** 로 정리하여 가독성을 높여주세요.
+### 1) 사업의 필요성
+- 대상자의 욕구 및 문제점 (통계 자료나 실태 조사 결과를 가상의 데이터로 인용하여 신뢰도 확보)
+- 지역사회 환경적 특성 및 사업의 시급성
+- 기존 사업과의 차별성
+- *> 🖼️ [인포그래픽 제안] 문제 나무(Problem Tree) 또는 욕구 분석 도표*
 
-[목차]
-1) 사업의 필요성 (문제 제기, 대상자의 욕구 및 문제점, 지역사회 환경적 특성)
-2) 서비스 지역, 서비스 대상 및 실인원수 (산출 근거 포함)
-3) 사업 목적 및 목표 (성과목표 및 산출목표를 구체적인 수치로 제시)
-4) 사업 내용 (세부사업명, 일정, 수행인력, 수행방법, 진행내용 등 - 키워드: ${projectInfo.keywords})
-5) 예산 계획 (개략적인 비목과 산출 근거${projectInfo.budget ? `, 총액 ${projectInfo.budget} 규모 준수` : ''})
-6) 평가 계획 (평가 지표, 측정도구, 평가 방법 및 시기 - **표(Table)로 제시**)
-7) 기대 효과 (참여자 변화, 지역사회 변화 등)
+### 2) 서비스 지역, 서비스 대상 및 실인원수
+- 산출 근거를 논리적으로 제시 (일반집단 -> 위기집단 -> 표적집단 -> 실인원)
+- 위 과정을 **표(Table)** 또는 도식화된 텍스트로 표현
 
-톤앤매너: 전문적이고 신뢰감을 주며, 사회적 가치를 강조하는 문체.
-    `.trim();
+### 3) 사업 목적 및 목표
+- 산출목표(Output)와 성과목표(Outcome)로 구분하여 제시
+- 목표는 구체적이고 측정 가능해야 함 (SMART 기법 적용)
+
+### 4) 사업 내용
+- 세부사업명, 일정, 수행인력, 수행방법, 진행내용을 상세히 기술
+- 키워드 반영: ${projectInfo.keywords}
+- *> 🖼️ [인포그래픽 제안] 사업 추진 절차도(Flowchart)*
+
+### 5) 예산 계획
+- 산출 내역을 구체적으로 기재 (단가 x 수량 x 횟수 등)
+- 총 예산: ${projectInfo.budget || '적정 규모'} (비목: 인건비, 사업비, 관리운영비 등)
+- **표(Table) 형식 필수**
+
+### 6) 평가 계획 (중요)
+- 성과 목표에 따른 평가 지표, 측정도구, 평가 방법 및 시기를 구체적으로 제시
+- **아래 양식의 마크다운 표(Table)로 작성해주세요:**
+  | 성과목표 | 성과지표 | 측정도구 | 평가방법 | 평가시기 |
+  |---|---|---|---|---|
+  | (내용) | (내용) | (내용) | (내용) | (내용) |
+
+### 7) 기대 효과
+- 참여자(대상자)의 변화
+- 지역사회의 변화 및 파급 효과
+- *> 🖼️ [인포그래픽 제안] 변화 전후 비교 또는 기대효과 구조도*
+
+`.trim();
     setGeneratedPrompt(prompt);
   }, [agencyInfo, projectInfo, attachedFile]);
 
@@ -161,118 +189,106 @@ const App: React.FC = () => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } catch (error) {
-      alert("제안서 생성에 실패했습니다. API 키를 확인하거나 잠시 후 다시 시도해주세요.");
+      console.error(error);
+      alert("제안서 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
+    <div className="min-h-screen bg-slate-50 pb-20 font-sans">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg text-white">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+          <div className="bg-blue-600 p-2 rounded-lg text-white shadow-md">
             <FileText size={24} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">사회복지사 사업계획서 프롬프트 생성기</h1>
-            <p className="text-xs text-slate-500">사회복지공동모금회 기준 양식 지원</p>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">사회복지사 사업계획서 프롬프트 생성기</h1>
+            <p className="text-xs text-slate-500 font-medium">사회복지공동모금회 배분신청서 표준 양식 기반</p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left Column: Inputs */}
-        <div className="space-y-6">
+        {/* Left Column: Inputs (5/12 width) */}
+        <div className="lg:col-span-5 space-y-6">
           
           {/* Section 1: Agency Info */}
-          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
-              <Building size={18} className="text-blue-600" />
-              <h2 className="font-semibold text-slate-800">1. 신청기관 정보</h2>
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group hover:shadow-md transition-shadow">
+            <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
+              <Building size={16} className="text-blue-600" />
+              <h2 className="font-bold text-slate-700">1. 신청기관 정보</h2>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-5 grid grid-cols-1 gap-3">
               <InputGroup label="기관명" name="name" value={agencyInfo.name} onChange={handleAgencyChange} placeholder="OO종합사회복지관" />
-              <InputGroup label="대표자" name="representative" value={agencyInfo.representative} onChange={handleAgencyChange} />
-              <div className="md:col-span-2">
-                <InputGroup label="주소" name="address" value={agencyInfo.address} onChange={handleAgencyChange} />
+              <div className="grid grid-cols-2 gap-3">
+                <InputGroup label="대표자" name="representative" value={agencyInfo.representative} onChange={handleAgencyChange} />
+                <InputGroup label="설립일" name="foundingDate" value={agencyInfo.foundingDate} onChange={handleAgencyChange} type="date" />
               </div>
-              <InputGroup label="담당자" name="contactPerson" value={agencyInfo.contactPerson} onChange={handleAgencyChange} />
-              <InputGroup label="연락처" name="phone" value={agencyInfo.phone} onChange={handleAgencyChange} />
-              <InputGroup label="이메일" name="email" value={agencyInfo.email} onChange={handleAgencyChange} type="email" />
-              <InputGroup label="설립일" name="foundingDate" value={agencyInfo.foundingDate} onChange={handleAgencyChange} type="date" />
-              <div className="md:col-span-2">
-                <InputGroup label="주요 사업 분야" name="mainBusiness" value={agencyInfo.mainBusiness} onChange={handleAgencyChange} placeholder="예: 노인복지, 지역사회조직, 사례관리 등" />
-              </div>
+              <InputGroup label="주소" name="address" value={agencyInfo.address} onChange={handleAgencyChange} />
+              <InputGroup label="주요 사업 분야" name="mainBusiness" value={agencyInfo.mainBusiness} onChange={handleAgencyChange} placeholder="예: 노인복지, 사례관리" />
             </div>
           </section>
 
           {/* Section 2: Project Info */}
-          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-             <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
-              <Sparkles size={18} className="text-blue-600" />
-              <h2 className="font-semibold text-slate-800">2. 사업 정보 (필수 및 상세)</h2>
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group hover:shadow-md transition-shadow">
+             <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
+              <Sparkles size={16} className="text-blue-600" />
+              <h2 className="font-bold text-slate-700">2. 사업 정보 (상세)</h2>
             </div>
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <InputGroup 
-                  label="사업명 (필수)" 
-                  name="title" 
-                  value={projectInfo.title} 
-                  onChange={handleProjectChange} 
-                  placeholder="예: 우리 마을 문제 해결을 위한 AI 융합 메이커 동아리 운영" 
-                  required
-                />
-                <InputGroup 
-                  label="핵심 키워드 및 강조점" 
-                  name="keywords" 
-                  value={projectInfo.keywords} 
-                  onChange={handleProjectChange} 
-                  placeholder="예: 기후 위기, AI 코딩, 지역 노인정 봉사, 학생 주도성" 
-                  type="textarea"
-                />
-              </div>
+            <div className="p-5 space-y-4">
+              <InputGroup 
+                label="사업명 (필수)" 
+                name="title" 
+                value={projectInfo.title} 
+                onChange={handleProjectChange} 
+                placeholder="예: 독거노인 우울감 해소를 위한 원예 프로그램" 
+                required
+              />
+              <InputGroup 
+                label="핵심 키워드" 
+                name="keywords" 
+                value={projectInfo.keywords} 
+                onChange={handleProjectChange} 
+                placeholder="예: 정서지원, 자조모임, 마을공동체" 
+                type="textarea"
+              />
 
-              <div className="h-px bg-slate-100 my-4"></div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-slate-500 mb-3 flex items-center gap-1">
-                  <Clipboard size={14} /> 상세 정보 (선택)
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InputGroup label="사업 대상" name="target" value={projectInfo.target || ''} onChange={handleProjectChange} placeholder="예: 지역 내 독거노인 50명" />
-                  <InputGroup label="참여 인원" name="participantCount" value={projectInfo.participantCount || ''} onChange={handleProjectChange} placeholder="예: 20명" />
-                  <div className="md:col-span-2">
-                    <InputGroup label="사업 장소" name="location" value={projectInfo.location || ''} onChange={handleProjectChange} placeholder="예: 복지관 2층 강당 및 인근 경로당" />
+              <div className="pt-2 border-t border-slate-100">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">세부 정보 (선택)</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <InputGroup label="사업 대상" name="target" value={projectInfo.target || ''} onChange={handleProjectChange} placeholder="예: 우울군 노인 30명" />
+                  <InputGroup label="참여 인원" name="participantCount" value={projectInfo.participantCount || ''} onChange={handleProjectChange} placeholder="예: 30명" />
+                  <InputGroup label="총 예산" name="budget" value={projectInfo.budget || ''} onChange={handleProjectChange} placeholder="예: 10,000,000원" />
+                  <InputGroup label="사업 기간" name="projectPeriod" value={projectInfo.projectPeriod || ''} onChange={handleProjectChange} placeholder="예: 2024.03-12" />
+                  <div className="col-span-2">
+                    <InputGroup label="사업 장소" name="location" value={projectInfo.location || ''} onChange={handleProjectChange} placeholder="예: 복지관 프로그램실" />
                   </div>
-                  <InputGroup label="총 예산" name="budget" value={projectInfo.budget || ''} onChange={handleProjectChange} placeholder="예: 50,000,000원" />
-                  <InputGroup label="사업 기간" name="projectPeriod" value={projectInfo.projectPeriod || ''} onChange={handleProjectChange} placeholder="예: 2024.01 ~ 2024.12" />
                 </div>
               </div>
             </div>
           </section>
 
           {/* Section 3: File Upload */}
-          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-             <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
-              <Upload size={18} className="text-blue-600" />
-              <h2 className="font-semibold text-slate-800">3. 사업 공고문 첨부 (PDF)</h2>
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group hover:shadow-md transition-shadow">
+             <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center gap-2">
+              <Upload size={16} className="text-blue-600" />
+              <h2 className="font-bold text-slate-700">3. 공고문/참고자료 (PDF)</h2>
             </div>
-            <div className="p-6">
-              <div className="mb-2 text-sm text-slate-600">
-                사업 공고문이나 가이드라인이 있다면 PDF로 첨부해주세요. AI가 내용을 분석하여 반영합니다.
-              </div>
-              
+            <div className="p-5">
               {!attachedFile ? (
                 <div 
-                  className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer"
+                  className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer group/upload"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <FileIcon className="mx-auto h-10 w-10 text-slate-400 mb-2" />
-                  <p className="text-slate-600 font-medium">클릭하여 PDF 파일 업로드</p>
-                  <p className="text-xs text-slate-400 mt-1">최대 20MB</p>
+                  <div className="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover/upload:bg-blue-100 transition-colors">
+                    <FileIcon className="h-6 w-6 text-slate-400 group-hover/upload:text-blue-500 transition-colors" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-700">클릭하여 PDF 업로드</p>
+                  <p className="text-xs text-slate-400 mt-1">공고문 등을 첨부하면 AI가 분석합니다 (최대 20MB)</p>
                   <input 
                     type="file" 
                     accept="application/pdf" 
@@ -282,21 +298,18 @@ const App: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="bg-white p-2 rounded shadow-sm">
-                      <FileIcon className="text-red-500 h-6 w-6" />
-                    </div>
+                    <FileIcon className="text-red-500 h-5 w-5 flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="font-medium text-slate-700 truncate">{attachedFile.name}</p>
-                      <p className="text-xs text-slate-500">PDF 문서 첨부됨</p>
+                      <p className="text-sm font-medium text-slate-700 truncate">{attachedFile.name}</p>
                     </div>
                   </div>
                   <button 
                     onClick={removeFile}
-                    className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
               )}
@@ -305,90 +318,90 @@ const App: React.FC = () => {
 
         </div>
 
-        {/* Right Column: Prompt Preview & Action */}
-        <div className="space-y-6">
+        {/* Right Column: Prompt & Action (7/12 width) */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
           
-          {/* Prompt Preview Card */}
-          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full max-h-[600px] sticky top-24">
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+          {/* Prompt Preview */}
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col max-h-[500px]">
+            <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <h2 className="font-semibold text-slate-800">생성된 프롬프트</h2>
+                <h2 className="font-bold text-slate-700">생성된 프롬프트 미리보기</h2>
               </div>
               <button 
                 onClick={copyToClipboard}
-                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all ${copied ? 'bg-green-100 text-green-700' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all ${copied ? 'bg-green-100 text-green-700 border-green-200' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
               >
                 {copied ? <Check size={14} /> : <Clipboard size={14} />}
-                {copied ? '복사됨' : '복사하기'}
+                {copied ? '복사완료' : '프롬프트 복사'}
               </button>
             </div>
             
             <div className="p-4 flex-grow overflow-y-auto bg-slate-50/50">
-              <div className="bg-slate-800 text-slate-100 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap shadow-inner leading-relaxed">
+              <div className="bg-slate-800 text-slate-200 p-4 rounded-lg text-xs font-mono whitespace-pre-wrap shadow-inner leading-relaxed border border-slate-700">
                 {generatedPrompt}
               </div>
             </div>
-
-            <div className="p-4 bg-white border-t border-slate-200">
-               <button
-                onClick={handleGenerateProposal}
-                disabled={isGenerating || !projectInfo.title}
-                className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-all ${
-                  isGenerating || !projectInfo.title
-                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-                }`}
-              >
-                {isGenerating ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    AI가 사업계획서를 작성 중입니다...
-                  </>
-                ) : (
-                  <>
-                    <Send size={18} />
-                    AI로 사업계획서 초안 생성하기
-                  </>
-                )}
-              </button>
-              <p className="text-center text-xs text-slate-400 mt-2">
-                * 생성된 내용은 참고용이며, 반드시 전문가의 검토가 필요합니다.
-              </p>
-            </div>
           </section>
-        </div>
 
-        {/* Full Width Result Area */}
-        {proposalResult && (
-          <div className="lg:col-span-2 pt-8 border-t border-slate-200" ref={resultRef}>
-            <section className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex justify-between items-center text-white">
+           {/* Action Button */}
+           <button
+            onClick={handleGenerateProposal}
+            disabled={isGenerating || !projectInfo.title}
+            className={`w-full py-4 px-6 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-md ${
+              isGenerating || !projectInfo.title
+                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:-translate-y-0.5'
+            }`}
+          >
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                AI가 사업계획서를 작성하고 있습니다... (약 1분 소요)
+              </>
+            ) : (
+              <>
+                <Sparkles size={20} className="text-yellow-300" />
+                사업계획서 생성하기
+              </>
+            )}
+          </button>
+
+          {/* Result Area */}
+          {proposalResult && (
+            <section className="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700" ref={resultRef}>
+               <div className="bg-slate-900 px-6 py-4 flex justify-between items-center text-white border-b border-slate-800">
                 <h2 className="font-bold text-lg flex items-center gap-2">
-                  <Sparkles size={20} className="text-yellow-300" />
-                  AI 생성 결과물
+                  <FileText size={20} className="text-blue-400" />
+                  제안서 초안 결과
                 </h2>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => {
-                       navigator.clipboard.writeText(proposalResult);
-                       alert('결과물이 복사되었습니다.');
-                    }}
-                    className="flex items-center gap-1 text-sm bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    <Clipboard size={16} /> 복사
-                  </button>
-                </div>
+                <button 
+                  onClick={() => {
+                      navigator.clipboard.writeText(proposalResult);
+                      alert('결과물이 복사되었습니다.');
+                  }}
+                  className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors text-slate-300"
+                >
+                  <Clipboard size={14} /> 전체 복사
+                </button>
               </div>
-              <div className="p-8 prose prose-slate prose-headings:my-2 prose-p:my-1 prose-li:my-0.5 max-w-none bg-white">
-                <ReactMarkdown>{proposalResult}</ReactMarkdown>
+              <div className="p-8 bg-white min-h-[500px]">
+                <article className="prose prose-slate prose-sm md:prose-base max-w-none 
+                  prose-headings:font-bold prose-headings:text-slate-800 prose-h1:text-2xl prose-h2:text-xl prose-h2:border-b prose-h2:pb-2 prose-h2:mt-8 prose-h3:text-lg prose-h3:text-blue-700
+                  prose-p:text-slate-700 prose-p:leading-relaxed prose-p:my-2
+                  prose-li:my-0
+                  prose-strong:text-slate-900 prose-strong:font-bold
+                  prose-table:border prose-table:border-slate-300 prose-table:text-sm
+                  prose-th:bg-slate-100 prose-th:p-2 prose-th:border prose-th:border-slate-300
+                  prose-td:p-2 prose-td:border prose-td:border-slate-300
+                  prose-blockquote:bg-blue-50 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:my-4 prose-blockquote:not-italic
+                ">
+                  <ReactMarkdown>{proposalResult}</ReactMarkdown>
+                </article>
               </div>
             </section>
-          </div>
-        )}
+          )}
+        </div>
 
       </main>
     </div>
