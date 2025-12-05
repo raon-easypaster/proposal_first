@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Building, FileText, Clipboard, Check, Sparkles, Send, Upload, File as FileIcon, X, AlertTriangle } from 'lucide-react';
+import { Building, FileText, Clipboard, Check, Sparkles, Upload, File as FileIcon, X, Settings, Key } from 'lucide-react';
 import { AgencyInfo, ProjectInfo, FileData } from './types';
 import { InputGroup } from './components/InputGroup';
 import { generateProposalFromGemini } from './services/geminiService';
 import ReactMarkdown from 'react-markdown';
 
 const App: React.FC = () => {
+  // State for API Key management
+  const [apiKey, setApiKey] = useState<string>('');
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+
   const [agencyInfo, setAgencyInfo] = useState<AgencyInfo>({
     name: '',
     representative: '',
@@ -32,18 +36,30 @@ const App: React.FC = () => {
   const [proposalResult, setProposalResult] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
-  const [apiKeyError, setApiKeyError] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Refs for scrolling
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Check for API Key on mount
+  // Initialize API Key from Env or LocalStorage
   useEffect(() => {
-    if (!process.env.API_KEY) {
-      setApiKeyError(true);
+    // Try env vars first (Vite or Node), then localStorage
+    // @ts-ignore
+    const envKey = import.meta.env?.VITE_API_KEY || process.env?.API_KEY;
+    const storedKey = localStorage.getItem('gemini_api_key');
+    
+    if (envKey) {
+      setApiKey(envKey);
+    } else if (storedKey) {
+      setApiKey(storedKey);
+    } else {
+      setShowSettings(true); // Open settings if no key found
     }
   }, []);
+
+  const saveApiKey = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem('gemini_api_key', key);
+    setShowSettings(false);
+  };
 
   const handleAgencyChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -59,13 +75,10 @@ const App: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file type
     if (file.type !== 'application/pdf') {
       alert('PDF 파일만 업로드 가능합니다.');
       return;
     }
-
-    // Check file size (e.g., 20MB limit)
     if (file.size > 20 * 1024 * 1024) {
       alert('파일 크기는 20MB 이하여야 합니다.');
       return;
@@ -90,21 +103,22 @@ const App: React.FC = () => {
     }
   };
 
-  // Construct the prompt whenever inputs change
+  // Construct the prompt
   useEffect(() => {
     let prompt = `
-당신은 대한민국 사회복지공동모금회(사랑의열매) 배분 신청 사업계획서 작성 전문 컨설턴트입니다.
+당신은 대한민국 사회복지공동모금회(사랑의열매) 배분 신청 사업계획서 작성 최고 전문가입니다.
 제공된 정보를 바탕으로 **심사위원이 즉시 채택할 수 있는 수준의 구체적이고 전문적인** 사업계획서를 작성하십시오.
 
-[핵심 작성 원칙]
+[엄격한 작성 원칙 - 반드시 준수할 것]
 1. **서술 태도**: 신뢰감을 주는 전문적인 용어와 명료한 종결어미(~함, ~임, ~이어야 함)를 사용하십시오.
-2. **레이아웃(매우 중요)**:
-   - **빈 줄 제거**: 문단 사이나 리스트 항목 사이에 불필요한 공백 라인을 절대 넣지 마십시오. 정보 밀도를 높이세요.
+2. **레이아웃(매우 중요 - Compact Mode)**:
+   - **빈 줄 제거**: 문단과 문단 사이, 리스트 항목 사이에 빈 줄을 넣지 마십시오. 정보의 밀도를 극대화하십시오.
+   - 모든 내용은 빽빽하게 작성되어야 하며, 불필요한 여백을 최소화하십시오.
    - **강조**: 핵심 수치와 키워드는 굵게(**) 표시하십시오.
 3. **시각적 요소(인포그래픽)**: 
-   - 텍스트로만 구성하지 말고, 적절한 위치에 인포그래픽 제안을 삽입하십시오.
+   - 텍스트로만 구성하지 말고, 각 주요 섹션마다 **[인포그래픽 제안]**을 반드시 포함하십시오.
    - 양식: \`> 🖼️ **[인포그래픽 제안]** (제목): (구성 내용 설명)\`
-4. **평가 및 예산**: 반드시 **마크다운 표(Table)**로 작성해야 합니다.
+4. **구체성**: 추상적인 표현(노력하겠다 등)을 지양하고, 구체적인 수치와 방법론을 제시하십시오.
 
 ---
 `;
@@ -140,7 +154,7 @@ const App: React.FC = () => {
 ### 1) 사업의 필요성
 - 대상자의 욕구 및 문제점 (통계/데이터 인용 스타일)
 - 지역사회 환경적 특성 및 시급성
-- 기존 유사 사업과의 차별성 및 본 사업의 독창성
+- 기존 유사 사업과의 차별성
 - *> 🖼️ [인포그래픽 제안] 문제 분석도(Problem Tree) 또는 욕구 흐름도*
 
 ### 2) 서비스 지역 및 대상자 선정
@@ -149,21 +163,19 @@ const App: React.FC = () => {
 
 ### 3) 사업 목적 및 목표
 - 산출목표(Output)와 성과목표(Outcome)로 명확히 구분
-- SMART 기법(구체적, 측정가능, 달성가능, 현실적, 제한시간) 적용
+- SMART 기법 적용하여 구체적으로 기술
 
 ### 4) 사업 내용 (세부 프로그램)
 - 프로그램명, 수행기간, 수행인력, 수행방법, 세부 진행내용 기술
-- 키워드 반영: ${projectInfo.keywords}
 - *> 🖼️ [인포그래픽 제안] 사업 추진 절차도(Process Flow)*
 
 ### 5) 예산 계획
 - 산출 내역을 구체적으로 기재 (산출식: 단가 x 인원 x 횟수)
-- 비목 구분(인건비, 사업비, 관리비) 준수
 - **반드시 마크다운 표(Table)로 작성**
 
 ### 6) 평가 계획 (필수)
 - 성과 목표 달성 여부를 측정하기 위한 구체적 계획
-- **아래 양식의 마크다운 표(Table)로 작성:**
+- **반드시 아래 양식의 마크다운 표(Table)로 작성:**
   | 평가 지표 | 측정도구 | 평가 방법 | 평가 시기 |
   |---|---|---|---|
   | (지표 내용) | (척도/설문지 등) | (사전사후검사 등) | (시기) |
@@ -172,7 +184,6 @@ const App: React.FC = () => {
 - 참여자(개인) 차원의 변화
 - 지역사회(환경) 차원의 변화
 - *> 🖼️ [인포그래픽 제안] 기대효과 구조도 또는 변화 전후 비교*
-
 `.trim();
     setGeneratedPrompt(prompt);
   }, [agencyInfo, projectInfo, attachedFile]);
@@ -188,22 +199,22 @@ const App: React.FC = () => {
       alert("사업명은 필수 입력 사항입니다.");
       return;
     }
-    if (apiKeyError) {
-      alert("API Key가 설정되지 않았습니다. 환경 변수를 확인해주세요.");
+    if (!apiKey) {
+      setShowSettings(true);
       return;
     }
 
     setIsGenerating(true);
     try {
-      const result = await generateProposalFromGemini(generatedPrompt, attachedFile || undefined);
+      const result = await generateProposalFromGemini(generatedPrompt, apiKey, attachedFile || undefined);
       setProposalResult(result);
-      // Scroll to result after a short delay
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } catch (error) {
       console.error(error);
-      alert("제안서 생성에 실패했습니다. API Key 상태나 네트워크를 확인해주세요.");
+      alert("제안서 생성에 실패했습니다. API Key를 확인해주세요.");
+      setShowSettings(true);
     } finally {
       setIsGenerating(false);
     }
@@ -211,6 +222,50 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-900">
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-300">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Settings size={20} /> API 설정
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Google Gemini API Key를 입력해주세요.<br/>
+              이 키는 브라우저에만 저장되며 서버로 전송되지 않습니다.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 mb-1">API Key</label>
+              <input 
+                type="password" 
+                placeholder="AIza..." 
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="px-4 py-2 text-slate-500 hover:text-slate-700"
+              >
+                닫기
+              </button>
+              <button 
+                onClick={() => saveApiKey(apiKey)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                저장하기
+              </button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400">
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline hover:text-blue-500">
+                API Key 발급받기 &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -223,12 +278,13 @@ const App: React.FC = () => {
               <p className="text-xs text-slate-500 font-medium">사회복지공동모금회 배분신청서 표준 양식 기반</p>
             </div>
           </div>
-          {apiKeyError && (
-             <div className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1.5 rounded-full text-xs font-bold border border-red-200 animate-pulse">
-               <AlertTriangle size={14} />
-               API Key 미설정됨
-             </div>
-          )}
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            title="API 설정"
+          >
+            <Settings size={20} />
+          </button>
         </div>
       </header>
 

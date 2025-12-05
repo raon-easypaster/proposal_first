@@ -11,26 +11,43 @@
       body {
         font-family: 'Noto Sans KR', sans-serif;
       }
-      /* Compact typography overrides */
+      /* Compact typography overrides for "No Empty Lines" request */
       .prose p {
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
+        margin-top: 0.25em !important;
+        margin-bottom: 0.25em !important;
+        line-height: 1.5;
       }
-      .prose ul > li {
-        margin-top: 0.2em;
-        margin-bottom: 0.2em;
+      .prose ul, .prose ol {
+        margin-top: 0.25em !important;
+        margin-bottom: 0.25em !important;
+      }
+      .prose ul > li, .prose ol > li {
+        margin-top: 0.1em !important;
+        margin-bottom: 0.1em !important;
+        padding-left: 0.2em;
+      }
+      .prose h1, .prose h2, .prose h3 {
+        margin-top: 1em !important;
+        margin-bottom: 0.5em !important;
       }
       .prose table {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+        margin-top: 0.5em !important;
+        margin-bottom: 0.5em !important;
+      }
+      .prose td, .prose th {
+        padding: 0.4em !important;
       }
     </style>
   <script type="importmap">
 {
   "imports": {
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
     "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
@@ -39,6 +56,6 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

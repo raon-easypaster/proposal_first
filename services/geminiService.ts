@@ -1,17 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { FileData } from "../types";
 
-const getClient = () => {
-  const apiKey = process.env.API_KEY;
+export const generateProposalFromGemini = async (prompt: string, apiKey: string, file?: FileData): Promise<string> => {
   if (!apiKey) {
-    throw new Error("API Key is missing");
+    throw new Error("API Key가 필요합니다.");
   }
-  return new GoogleGenAI({ apiKey });
-};
 
-export const generateProposalFromGemini = async (prompt: string, file?: FileData): Promise<string> => {
   try {
-    const ai = getClient();
+    const ai = new GoogleGenAI({ apiKey });
     
     const parts: any[] = [{ text: prompt }];
 
@@ -28,7 +24,7 @@ export const generateProposalFromGemini = async (prompt: string, file?: FileData
       model: 'gemini-2.5-flash',
       contents: { parts },
       config: {
-        // Enable thinking for more detailed reasoning and structural planning
+        // High thinking budget for detailed reasoning
         thinkingConfig: { thinkingBudget: 4096 },
         temperature: 0.7,
       }
@@ -37,6 +33,6 @@ export const generateProposalFromGemini = async (prompt: string, file?: FileData
     return response.text || "생성된 내용이 없습니다.";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    throw new Error("제안서 생성 중 오류가 발생했습니다.");
+    throw error;
   }
 };
